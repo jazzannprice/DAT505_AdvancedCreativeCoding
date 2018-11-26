@@ -1,5 +1,6 @@
 //Global variables
 var renderer, scene, camera, composer, parkScene, sunMain;
+var backgroundColour = 0xC5DFEB;
 var gui = null;
 
 let currentValue = { x: -38, y: 50, z: -200 };
@@ -8,10 +9,24 @@ let dayPosition = { x: -38, y: 50, z: -200 }
 let duskPosition = { x: 77, y: 10, z: -200 }
 let nightPosition = { x: -35, y: -50, z: -200 }
 
-const toDawn = new TWEEN.Tween(currentValue).to(dawnPosition, 1000);
-const toDay = new TWEEN.Tween(currentValue).to(dayPosition, 1000);
-const toDusk = new TWEEN.Tween(currentValue).to(duskPosition, 1000);
-const toNight = new TWEEN.Tween(currentValue).to(nightPosition, 1000);
+
+let toDawn = new TWEEN.Tween(currentValue).to(dawnPosition, 1000);
+let toDay = new TWEEN.Tween(currentValue).to(dayPosition, 1000);
+let toDusk = new TWEEN.Tween(currentValue).to(duskPosition, 1000);
+let toNight = new TWEEN.Tween(currentValue).to(nightPosition, 1000);
+
+
+let currentColour = { r: 197, g: 223, b: 235 }
+let dawnColour = { r: 255, g: 246, b: 186 }
+let dayColour = { r: 197, g: 223, b: 235 }
+let duskColour = { r: 255, g: 164, b: 139 }
+let nightColour = { r: 0, g: 2, b: 25 }
+
+
+ let toDawnColor = new TWEEN.Tween(currentColour).to(dawnColour, 1000);
+ let toDayColor = new TWEEN.Tween(currentColour).to(dayColour, 1000);
+ let toDuskColor = new TWEEN.Tween(currentColour).to(duskColour, 1000);
+ let toNightColor = new TWEEN.Tween(currentColour).to(nightColour, 1000);
 
 //Execute the main functions when the page loads
 window.onload = function() {
@@ -27,6 +42,7 @@ function init(){
   renderer.setSize( window.innerWidth, window.innerHeight );
   renderer.autoClear = false;
   renderer.setClearColor(0xC5DFEB, 1.0);
+
   document.getElementById('canvas').appendChild(renderer.domElement);
   //----------------------------------------------------------------------------
 
@@ -44,35 +60,35 @@ function init(){
   scene.add(camera);
 
   // Create the lights
-  var ambientLight = new THREE.AmbientLight(0x404040, 3);
+  var ambientLight = new THREE.AmbientLight(0x404040, 4.5);
   scene.add(ambientLight);
 
   var lights = [];
   lights[0] = new THREE.DirectionalLight( 0xffffff, 1, 100);
-  lights[0].position.set( 0, 10, 5);
+  lights[0].position.set( -38, 50, 5);
   lights[1] = new THREE.DirectionalLight(  0xfffff, 0.5, 100);
   lights[1].position.set(0, 10, -1);
 
   scene.add(lights[0]);
   scene.add( lights[1] );
-  scene.add( lights[2] );
 
-  lights[1].castShadow = true;
+
+  //lights[1].castShadow = true;
 
   window.addEventListener('resize', onWindowResize, false);
   window.addEventListener('click', function () {
     if (currentValue.x == -38) {
-      toDusk.start()
-      renderer.setClearColor(0xFFA48B, 1.0);
+      toDusk.start();
+      toDuskColor.start();
     } else if (currentValue.x == 77) {
       toNight.start();
-      renderer.setClearColor(0x000219, 1.0);
+      toNightColor.start();
     } else if (currentValue.x == -35) {
       toDawn.start();
-      renderer.setClearColor(0xFFF6BA, 1.0);
+      toDawnColor.start();
     } else if (currentValue.x == -145) {
       toDay.start();
-      renderer.setClearColor(0xC5DFEB, 1.0);
+      toDayColor.start();
     }
   })
 }
@@ -109,19 +125,31 @@ function geometry(){
     }
   )
   sunMain = new THREE.Object3D();
-  var geometryOcto = new THREE.IcosahedronGeometry(7, 1);
+  var geometryOcto = new THREE.SphereGeometry(5, 10, 10);
   scene.add(sunMain);
 
   //Create the materials
   var octoMaterial = new THREE.MeshPhongMaterial({
-    color: 0xFFFFDD,
-    shading: THREE.FlatShading
+    color: 0xFFEB73,
+    shading: THREE.FlatShading,
+    emissive: 0xF66120,
+
   });
 
   //Add materials to the mesh - sunMesh, skeletonMesh
   var sunMesh = new THREE.Mesh(geometryOcto, octoMaterial);
   sunMesh.scale.x = sunMesh.scale.y = sunMesh.scale.z = 1.7;
   sunMain.add(sunMesh);
+
+  // var sphere = new THREE.SphereBufferGeometry( 0.5, 16, 8 );
+  //
+	// light1 = new THREE.PointLight( 0xFFEB73, 5, 50 );
+	// 	light1.add( new THREE.Mesh( sphere, new THREE.MeshBasicMaterial( { color: 0xFFEB73 } ) ) );
+	// 	scene.add( light1 );
+  //
+  //   light1.position.x = -48.65
+  //   light1.position.y = 22.5
+  //   light1.position.z = 0
 }
 
 
@@ -139,6 +167,10 @@ function animate(time){
   requestAnimationFrame(animate);
   TWEEN.update(time);
 
+
+// var colorString = `rgb(${currentColour.r.toFixed(0)}, ${currentColour.b.toFixed(0)}, ${currentColour.g.toFixed(0)})`
+// renderer.setClearColor(new THREE.Color(colorString))
+renderer.setClearColor(new THREE.Color(currentColour.r / 255,currentColour.g / 255,currentColour.b / 255,))
 
 
 sunMain.position.x = currentValue.x;

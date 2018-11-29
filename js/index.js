@@ -1,9 +1,10 @@
 //Global variables
 var renderer, scene, camera, composer, parkScene, sunMain;
 var backgroundColour = 0xC5DFEB;
-var gui = null;
+//var gui = null;
 
-let currentValue = { x: -38, y: 50, z: -200 };
+// Tween settings
+let currentValue = { x: -38, y: 50, z: -200 }
 let dawnPosition = { x: -145, y: 10, z: -200 }
 let dayPosition = { x: -38, y: 50, z: -200 }
 let duskPosition = { x: 77, y: 10, z: -200 }
@@ -23,10 +24,10 @@ let duskColour = { r: 255, g: 164, b: 139 }
 let nightColour = { r: 0, g: 2, b: 25 }
 
 
- let toDawnColor = new TWEEN.Tween(currentColour).to(dawnColour, 1000);
- let toDayColor = new TWEEN.Tween(currentColour).to(dayColour, 1000);
- let toDuskColor = new TWEEN.Tween(currentColour).to(duskColour, 1000);
- let toNightColor = new TWEEN.Tween(currentColour).to(nightColour, 1000);
+let toDawnColor = new TWEEN.Tween(currentColour).to(dawnColour, 1000);
+let toDayColor = new TWEEN.Tween(currentColour).to(dayColour, 1000);
+let toDuskColor = new TWEEN.Tween(currentColour).to(duskColour, 1000);
+let toNightColor = new TWEEN.Tween(currentColour).to(nightColour, 1000);
 
 //Execute the main functions when the page loads
 window.onload = function() {
@@ -75,18 +76,23 @@ function init(){
 
   //lights[1].castShadow = true;
 
+  // Depending on the position of the sun, certain elements will change in the scene
   window.addEventListener('resize', onWindowResize, false);
   window.addEventListener('click', function () {
     if (currentValue.x == -38) {
+      toDusk.easing(TWEEN.Easing.Quadratic.InOut)
       toDusk.start();
       toDuskColor.start();
     } else if (currentValue.x == 77) {
+      toNight.easing(TWEEN.Easing.Quadratic.InOut)
       toNight.start();
       toNightColor.start();
     } else if (currentValue.x == -35) {
+      toDawn.easing(TWEEN.Easing.Quadratic.InOut)
       toDawn.start();
       toDawnColor.start();
     } else if (currentValue.x == -145) {
+      toDay.easing(TWEEN.Easing.Quadratic.InOut)
       toDay.start();
       toDayColor.start();
     }
@@ -106,7 +112,7 @@ function geometry(){
   parkScene = new THREE.Object3D();
 
   scene.add(parkScene);
-
+  // Importing the Maya OBJ object and material into the scene
   var mtlLoader = new THREE.MTLLoader()
   mtlLoader.load(
     'LandScape2.mtl',
@@ -124,11 +130,13 @@ function geometry(){
       )
     }
   )
+
+  //Create the sun object
   sunMain = new THREE.Object3D();
   var geometryOcto = new THREE.SphereGeometry(5, 10, 10);
   scene.add(sunMain);
 
-  //Create the materials
+  //Create the sun material
   var octoMaterial = new THREE.MeshPhongMaterial({
     color: 0xFFEB73,
     shading: THREE.FlatShading,
@@ -136,7 +144,7 @@ function geometry(){
 
   });
 
-  //Add materials to the mesh - sunMesh, skeletonMesh
+  //Add materials to the mesh
   var sunMesh = new THREE.Mesh(geometryOcto, octoMaterial);
   sunMesh.scale.x = sunMesh.scale.y = sunMesh.scale.z = 1.7;
   sunMain.add(sunMesh);
@@ -157,9 +165,10 @@ function geometry(){
 
 //}();
 
-var gui = new dat.GUI();
-    var f1 = gui.addFolder('Time Of Day');
-f1.add(sun, ["Dawn", "Day", "Dusk", "Night", "RealTime"]).onChange(setValue);
+// GUI
+// var gui = new dat.GUI();
+//     var f1 = gui.addFolder('Time Of Day');
+// f1.add(sun, ["Dawn", "Day", "Dusk", "Night", "RealTime"]).onChange(setValue);
 
 
 // Render Loop
@@ -170,14 +179,14 @@ function animate(time){
 
 // var colorString = `rgb(${currentColour.r.toFixed(0)}, ${currentColour.b.toFixed(0)}, ${currentColour.g.toFixed(0)})`
 // renderer.setClearColor(new THREE.Color(colorString))
+
+// Background colour animation
 renderer.setClearColor(new THREE.Color(currentColour.r / 255,currentColour.g / 255,currentColour.b / 255,))
 
-
+// Sun position animation
 sunMain.position.x = currentValue.x;
 sunMain.position.y = currentValue.y;
 sunMain.position.z = currentValue.z;
-
-
 
   // Render the scene
   renderer.clear();

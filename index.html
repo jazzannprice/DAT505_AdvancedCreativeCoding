@@ -1,26 +1,44 @@
+<!-- DAT505 - Jasmine Price - HTML Index -->
 
 <!DOCTYPE html>
 <html lang="en" >
 
 <head>
   <meta charset="UTF-8">
-  <title>ThreeJS Gradient</title>
-      <link rel="stylesheet" href="css/style.css">
+  <title>DAT505 - ThreeJS - Jasmine Price</title>
+    <link rel="stylesheet" href="css/style.css"> <!-- Link to the CSS Stylesheet -->
 </head>
 
 <body>
   <div id="canvas"></div>
-  <script src='build/three.js'></script>
-	<script src='build/three.min.js'></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/tween.js/17.2.0/Tween.min.js"></script>
-  <script src='http://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js'></script>>
+  <script src='build/three.js'></script> <!-- Link to three.js library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tween.js/17.2.0/Tween.min.js"></script> <!-- Link to the Tween library, responsible for animated transitions -->
+  <!-- <script src='http://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js'></script> -->
+  <script src='js/OBJLoader.js'></script> <!-- Loader to load obj files - the objects created in Maya -->
+  <script src='js/MTLLoader.js'></script> <!-- Loader to load mtl files - the materials created in Maya -->
 
-  <script src='js/OBJLoader.js'></script>
-  <script src='js/MTLLoader.js'></script>
+  <!-- The code below allows for the fragment shader to be used and add a glow effect to an object -->
+  <script id="vertexShader" type="x-shader/x-vertex">
+    varying vec3 vNormal;
+    void main()
+    {
+        vNormal = normalize( normalMatrix * normal );
+        gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+    }
+    </script>
 
+    <!-- Fragment shader -->
+    <script id="fragmentShader" type="x-shader/x-vertex">
+    varying vec3 vNormal;
+    void main()
+    {
+    	float intensity = pow( 0.05 - dot( vNormal, vec3( 0.0, 0.0, 1.0 ) ), 2.5 );
+        gl_FragColor = vec4(0.95, 0.86, 0.4 ,1.0) * intensity;
+    }
+  </script>
 
-  <script src="js/FirstPersonControls.js"></script>
-  <script  src="js/index.js"></script>
+  <script src="js/FirstPersonControls.js"></script> <!-- Link to the controls library that allows the camera to follow the mouse position -->
+  <script  src="js/index.js"></script> <!-- Link to my Javascript file with the code in -->
 
 </body>
 </html>

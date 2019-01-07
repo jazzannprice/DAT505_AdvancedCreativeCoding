@@ -1,15 +1,15 @@
 // DAT505 - Jasmine Price - Three.js
 
 // GLOBAL-------------------------------------------------
-var camera, scene, renderer, controls, clock, composer, sunMain, light1;
+var camera, scene, renderer, controls, clock, composer, sunMain, light1, moonMain, lightFollow;
 var backgroundColour = 0xC5DFEB;
 var INV_MAX_FPS = 1 / 100, frameDelta = 0;
 
 // Tween settings that are used to animate visuals in the project
 // The fixed positions of the sun in the project depending on the time of day
-let currentValue = { x: 0, y: 150, z: 35 };
+let currentValue = { x: 0, y: 220, z: 35 };
 let dawnPosition = { x: -600, y: 0, z: 35 }
-let dayPosition = { x: 0, y: 150, z: 35 }
+let dayPosition = { x: 0, y: 220, z: 35 }
 let duskPosition = { x: 600, y: 0, z: 35 }
 let nightPosition = { x: -10, y: -50, z: 35 }
 
@@ -33,10 +33,10 @@ let toDuskColor = new TWEEN.Tween(currentColour).to(duskColour, 1000);
 let toNightColor = new TWEEN.Tween(currentColour).to(nightColour, 1000);
 
 // The fixed lights of the sun in the project depending on the time of day
-let currentLight = { x: 0, y: 50, z: 35 };
-let dawnLight = { x: -100, y: 10, z: 35 }
-let dayLight = { x: 0, y: 50, z: 35 }
-let duskLight = { x: 100, y: 10, z: 35 }
+let currentLight = { x: 0, y: 220, z: 35 };
+let dawnLight = { x: -600, y: 0, z: 35 }
+let dayLight = { x: 0, y: 220, z: 35 }
+let duskLight = { x: 600, y: 0, z: 35 }
 let nightLight = { x: -10, y: -50, z: 35 }
 
 // The tween that allows the sun light to be mapped to the correct position depending on the current value
@@ -44,6 +44,16 @@ let toDawnLight = new TWEEN.Tween(currentLight).to(dawnLight, 1000);
 let toDayLight = new TWEEN.Tween(currentLight).to(dayLight, 1000);
 let toDuskLight = new TWEEN.Tween(currentLight).to(duskLight, 1000);
 let toNightLight = new TWEEN.Tween(currentLight).to(nightLight, 1000);
+
+// The fixed position of the moon in the project depending on the time of day
+let currentMoonValue = { x: -300, y: -50, z: 35 };
+let moonNight = { x: -300, y: 220, z: 35 }
+let moonDay = { x: -300, y: -50, z: 35 }
+
+// The tween that allows the moon to be mapped to the correct position depending on the current value
+let toMoonDay= new TWEEN.Tween(currentMoonValue).to(moonDay, 1000);
+let toMoonNight = new TWEEN.Tween(currentMoonValue).to(moonNight, 1000);
+
 
 
 // THE SETUP-------------------------------------------------
@@ -71,12 +81,12 @@ function setup() {
 // initialSetup function, responsible for rendering and the initial window, camera, controls and light settings
 function initialSetup() {
   scene = new THREE.Scene(); // Create new scene
-  scene.fog = new THREE.FogExp2(0x9db3b5, 0.001); // Create subtle fog effect in scene
+  scene.fog = new THREE.FogExp2(0x9db3b5, 0.002); // Create subtle fog effect in scene
 
   // Configure camera settings---------------------------------------------------
   camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 10000 );
-  camera.position.y = 20;
-  camera.position.z = 35;
+  camera.position.y = 15;
+  camera.position.z = 15;
   //----------------------------------------------------------------------------
 
   // Configure renderer settings------------------------------------------------
@@ -96,14 +106,19 @@ function initialSetup() {
   controls.movementSpeed = 100;
   controls.lookSpeed = 0.1;
 
-  // Create the lights
+  //Create the lights
   var ambientLight = new THREE.AmbientLight(0x404040, 4.5);
   scene.add(ambientLight);
 
-  light1 = new THREE.DirectionalLight( 0xffffff, 0.8, 100);
+  light1 = new THREE.DirectionalLight( 0xffffff, 0.5, 100);
   light1.position.set( 0, 10, 0);
   scene.add(light1);
   light1.castShadow = true;
+  var helper = new THREE.DirectionalLightHelper( light1, 5 );
+  scene.add( helper );
+
+
+
 
   // Depending on the position of the sun, certain elements will change in the scene when the user clicks on the screen
   window.addEventListener('resize', onWindowResize, false);
@@ -117,11 +132,13 @@ function initialSetup() {
       toNight.easing(TWEEN.Easing.Quadratic.InOut)
       toNight.start();
       toNightColor.start();
+      toMoonNight.start();
       toNightLight.start();
     } else if (currentValue.x == -10) {
       toDawn.easing(TWEEN.Easing.Quadratic.InOut)
       toDawn.start();
       toDawnColor.start();
+      toMoonDay.start();
       toDawnLight.start();
     } else if (currentValue.x == -600) {
       toDay.easing(TWEEN.Easing.Quadratic.InOut)
@@ -161,11 +178,11 @@ function geoSetup() {
 
   //Create the sun object
   sunMain = new THREE.Object3D();
-  var geometryOcto = new THREE.SphereGeometry(5, 20, 20);
+  var geometrySun = new THREE.SphereGeometry(12, 20, 20);
   scene.add(sunMain);
 
   //Create the suns material and glow effect using the fragment shader
-  var octoMaterial = new THREE.ShaderMaterial({
+  var sunMaterial = new THREE.ShaderMaterial({
     uniforms: { },
     vertexShader: document.getElementById( 'vertexShader' ).textContent,
     fragmentShader: document.getElementById( 'fragmentShader' ).textContent,
@@ -175,23 +192,73 @@ function geoSetup() {
   });
 
   //Add materials to the mesh
-  var sunMesh = new THREE.Mesh(geometryOcto, octoMaterial);
+  var sunMesh = new THREE.Mesh(geometrySun, sunMaterial);
   sunMesh.scale.x = sunMesh.scale.y = sunMesh.scale.z = 1.7;
   sunMain.add(sunMesh);
 
+  //Create the moon object
+  moonMain = new THREE.Object3D();
+  var geometryMoon = new THREE.SphereGeometry(12, 10, 10);
+  scene.add(moonMain);
+
+  //Create the moons material and glow effect using the fragment shader
+  var moonMaterial = new THREE.MeshPhongMaterial({
+    color: 0xA8A8A8,
+    shading: THREE.FlatShading,
+    //emissive: 0x474747,
+  });
+
+  //Add materials to the mesh
+  var moonMesh = new THREE.Mesh(geometryMoon, moonMaterial);
+  moonMesh.scale.x = moonMesh.scale.y = moonMesh.scale.z = 1.7;
+  moonMain.add(moonMesh);
+
+
+
+  // //Create the spotlight follow object
+  // lightFollow = new THREE.Object3D();
+  // var geometryLightFollow = new THREE.SphereGeometry(5, 10, 10);
+  // scene.add(lightFollow);
+  //
+  // //Create the moons material and glow effect using the fragment shader
+  // var lightFollowMaterial = new THREE.MeshPhongMaterial({
+  //   color: 0xA8A8A8,
+  //   shading: THREE.FlatShading,
+  //   //emissive: 0x474747,
+  // });
+  //
+  // //Add materials to the mesh
+  // var lightFollowMesh = new THREE.Mesh(geometryLightFollow, lightFollowMaterial);
+  // lightFollowMesh.scale.x = lightFollowMesh.scale.y = lightFollowMesh.scale.z = 1.7;
+  // lightFollow.add(lightFollowMesh);
+  //
+  // lightFollow.position.x = -100;
+  // lightFollow.position.y = 0;
+  // lightFollow.position.z = 50;
+
   // spotLight = new THREE.SpotLight( 0xFFEB73 );
   // spotLight.position.set( -175, 105, -90 );
+  // spotLight.angle = 0.2;
+  // spotLight.distance = 300;
+  // spotLight.intensity = 10;
+  // var spotLightHelper = new THREE.SpotLightHelper( spotLight );
+  // scene.add( spotLightHelper );
+  // spotLight.target = lightFollow;
+  // spotLight.target.updateMatrixWorld();
+  // spotLight.matrixWorldNeedsUpdate;
   //
   // spotLight.castShadow = true;
-  //
+
   // spotLight.shadow.mapSize.width = 1024;
   // spotLight.shadow.mapSize.height = 1024;
   //
   // spotLight.shadow.camera.near = 500;
   // spotLight.shadow.camera.far = 4000;
   // spotLight.shadow.camera.fov = 30;
-  //
+
   // scene.add( spotLight );
+  // scene.add( spotLight.target );
+
 
 }
 
@@ -199,6 +266,10 @@ function geoSetup() {
 function draw(time) {
   //requestAnimationFrame(draw);
   TWEEN.update(time);
+
+  // spotLight.rotation.y += 0.01;
+  // spotLight.target.rotation.y += 0.01;
+
 
   // Background colour animation
   renderer.setClearColor(new THREE.Color(currentColour.r / 255,currentColour.g / 255,currentColour.b / 255,))
@@ -212,6 +283,11 @@ function draw(time) {
   light1.position.x = currentLight.x;
   light1.position.y = currentLight.y;
   light1.position.z = currentLight.z;
+
+  // Moon position animation
+  moonMain.position.x = currentMoonValue.x;
+  moonMain.position.y = currentMoonValue.y;
+  moonMain.position.z = currentMoonValue.z;
 
   // Render the scene
   renderer.clear();

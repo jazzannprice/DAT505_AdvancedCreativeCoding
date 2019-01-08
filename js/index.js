@@ -21,7 +21,7 @@ let toNight = new TWEEN.Tween(currentValue).to(nightPosition, 1000);
 
 // The fixed colours of the sky in the project depending on the time of day
 let currentColour = { r: 197, g: 223, b: 235 }
-let dawnColour = { r: 255, g: 246, b: 186 }
+let dawnColour = { r: 255, g: 201, b: 126 }
 let dayColour = { r: 197, g: 223, b: 235 }
 let duskColour = { r: 255, g: 164, b: 139 }
 let nightColour = { r: 0, g: 2, b: 25 }
@@ -46,9 +46,9 @@ let toDuskLight = new TWEEN.Tween(currentLight).to(duskLight, 1000);
 let toNightLight = new TWEEN.Tween(currentLight).to(nightLight, 1000);
 
 // The fixed position of the moon in the project depending on the time of day
-let currentMoonValue = { x: -300, y: -50, z: 35 };
-let moonNight = { x: -300, y: 220, z: 35 }
-let moonDay = { x: -300, y: -50, z: 35 }
+let currentMoonValue = { x: -100, y: -50, z: -350 };
+let moonNight = { x: -100, y: 220, z: -350 }
+let moonDay = { x: -100, y: -50, z: -350 }
 
 // The tween that allows the moon to be mapped to the correct position depending on the current value
 let toMoonDay= new TWEEN.Tween(currentMoonValue).to(moonDay, 1000);
@@ -63,7 +63,7 @@ function setup() {
 
   // Call geoSetup to put objects/geometry on screen
   geoSetup();
-
+  clickSetup();
   // Loop using callback to animate function and update screen (camera) position
   requestAnimationFrame(function animate() {
     draw();
@@ -81,9 +81,8 @@ function setup() {
 // initialSetup function, responsible for rendering and the initial window, camera, controls and light settings
 function initialSetup() {
   scene = new THREE.Scene(); // Create new scene
-  scene.fog = new THREE.FogExp2(0x9db3b5, 0.002); // Create subtle fog effect in scene
-  var axesHelper = new THREE.AxesHelper( 50 );
-scene.add( axesHelper );
+  scene.fog = new THREE.FogExp2(0x9db3b5, 0.003); // Create subtle fog effect in scene
+
   // Configure camera settings---------------------------------------------------
   camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 10000 );
   camera.position.y = 15;
@@ -118,36 +117,6 @@ scene.add( axesHelper );
   var helper = new THREE.DirectionalLightHelper( light1, 5 );
   scene.add( helper );
 
-
-
-
-  // Depending on the position of the sun, certain elements will change in the scene when the user clicks on the screen
-  window.addEventListener('resize', onWindowResize, false);
-  window.addEventListener('click', function () {
-    if (currentValue.x == 0) {
-      toDusk.easing(TWEEN.Easing.Quadratic.InOut)
-      toDusk.start();
-      toDuskColor.start();
-      toDuskLight.start();
-    } else if (currentValue.x == 600) {
-      toNight.easing(TWEEN.Easing.Quadratic.InOut)
-      toNight.start();
-      toNightColor.start();
-      toMoonNight.start();
-      toNightLight.start();
-    } else if (currentValue.x == -10) {
-      toDawn.easing(TWEEN.Easing.Quadratic.InOut)
-      toDawn.start();
-      toDawnColor.start();
-      toMoonDay.start();
-      toDawnLight.start();
-    } else if (currentValue.x == -600) {
-      toDay.easing(TWEEN.Easing.Quadratic.InOut)
-      toDay.start();
-      toDayColor.start();
-      toDayLight.start();
-    }
-  })
 }
 
 // Function that allows the window to constantly resize depending on the size of the screen
@@ -204,7 +173,7 @@ function geoSetup() {
 
   //Create the moons material and glow effect using the fragment shader
   var moonMaterial = new THREE.MeshPhongMaterial({
-    color: 0xA8A8A8,
+    color: 0xffffff,
     shading: THREE.FlatShading,
     //emissive: 0x474747,
   });
@@ -214,72 +183,83 @@ function geoSetup() {
   moonMesh.scale.x = moonMesh.scale.y = moonMesh.scale.z = 1.7;
   moonMain.add(moonMesh);
 
+    var geometry = new THREE.ConeGeometry( 40, 600, 40 );
+
+  var material = new THREE.ShaderMaterial({
+    uniforms: { },
+    vertexShader: document.getElementById( 'vertexShader' ).textContent,
+    fragmentShader: document.getElementById( 'fragmentShader' ).textContent,
+    side: THREE.BackSide,
+    blending: THREE.AdditiveBlending,
+    transparent: true, // opacity: 0.2
+  });
+  cone = new THREE.Mesh( geometry, material );
+   cone.position.x = -165;
+   cone.position.y = -500;
+   cone.position.z = -50;
+   cone.rotation.x += 200;
+   cone.rotation.z += 50;
+
+  geometry.applyMatrix( new THREE.Matrix4().makeTranslation(0, -300, 0) );
+  scene.add( cone );
+
+  circle = new THREE.Object3D();
+  skelet = new THREE.Object3D();
+  particle = new THREE.Object3D();
+
+  scene.add(circle);
+  scene.add(skelet);
 
 
-  // //Create the spotlight follow object
-  // lightFollow = new THREE.Object3D();
-  // var geometryLightFollow = new THREE.SphereGeometry(5, 10, 10);
-  // scene.add(lightFollow);
-  //
-  // //Create the moons material and glow effect using the fragment shader
-  // var lightFollowMaterial = new THREE.MeshPhongMaterial({
-  //   color: 0xA8A8A8,
-  //   shading: THREE.FlatShading,
-  //   //emissive: 0x474747,
-  // });
-  //
-  // //Add materials to the mesh
-  // var lightFollowMesh = new THREE.Mesh(geometryLightFollow, lightFollowMaterial);
-  // lightFollowMesh.scale.x = lightFollowMesh.scale.y = lightFollowMesh.scale.z = 1.7;
-  // lightFollow.add(lightFollowMesh);
-  //
-  // lightFollow.position.x = -100;
-  // lightFollow.position.y = 0;
-  // lightFollow.position.z = 50;
+  var geometry = new THREE.IcosahedronGeometry(0, 0);
+;
 
-  // spotLight = new THREE.SpotLight( 0xFFEB73 );
-  // spotLight.position.set( -175, 105, -90 );
-  // spotLight.angle = 0.2;
-  // spotLight.distance = 300;
-  // spotLight.intensity = 10;
-  // var spotLightHelper = new THREE.SpotLightHelper( spotLight );
-  // scene.add( spotLightHelper );
-  // //spotLight.target = lightFollow;
-  // //spotLight.target.updateMatrixWorld();
-  // spotLight.matrixWorldNeedsUpdate;
-  //
-  // spotLight.castShadow = true;
-  //
-  // spotLight.shadow.mapSize.width = 1024;
-  // spotLight.shadow.mapSize.height = 1024;
-  //
-  // spotLight.shadow.camera.near = 500;
-  // spotLight.shadow.camera.far = 4000;
-  // spotLight.shadow.camera.fov = 30;
-  //
-  // scene.add( spotLight );
-  // scene.add( spotLight.target );
+  var material = new THREE.MeshPhongMaterial({
+    color: 0xffffff,
+    shading: THREE.FlatShading,
+  });
 
-  var geometry = new THREE.ConeGeometry( 30, 290, 32 );
+  for (var i = 0; i < 50; i++) {
+    var mesh = new THREE.Mesh(geometry, material);
+    mesh.position.set(Math.random() - 0.5, Math.random() + 0.1, Math.random() - 0.5).normalize();
+    mesh.position.multiplyScalar(90 + (Math.random() * 1000));
+    mesh.rotation.set(Math.random() * 2, Math.random() * 2, Math.random() * 2);
+    particle.add(mesh);
+  }
+}
 
-var material = new THREE.ShaderMaterial({
-  uniforms: { },
-  vertexShader: document.getElementById( 'vertexShader' ).textContent,
-  fragmentShader: document.getElementById( 'fragmentShader' ).textContent,
-  side: THREE.BackSide,
-  blending: THREE.AdditiveBlending,
-  transparent: true, // opacity: 0.2
-});
-cone = new THREE.Mesh( geometry, material );
- cone.position.x = -165;
- cone.position.y = 130;
- cone.position.z = -70;
- cone.rotation.x += 200;
- cone.rotation.z += 50;
-
-geometry.applyMatrix( new THREE.Matrix4().makeTranslation(0, -150, 0) );
-scene.add( cone );
-
+function clickSetup(){
+  // Depending on the position of the sun, certain elements will change in the scene when the user clicks on the screen
+  window.addEventListener('resize', onWindowResize, false);
+  window.addEventListener('click', function () {
+    if (currentValue.x == 0) {
+      toDusk.easing(TWEEN.Easing.Quadratic.InOut)
+      toDusk.start();
+      toDuskColor.start();
+      toDuskLight.start();
+    } else if (currentValue.x == 600) {
+      toNight.easing(TWEEN.Easing.Quadratic.InOut)
+      toNight.start();
+      toNightColor.start();
+      toMoonNight.start();
+      toNightLight.start();
+      cone.position.y = 117;
+      scene.add(particle);
+    } else if (currentValue.x == -10) {
+      toDawn.easing(TWEEN.Easing.Quadratic.InOut)
+      toDawn.start();
+      toDawnColor.start();
+      toMoonDay.start();
+      toDawnLight.start();
+      cone.position.y = -500;
+      scene.remove(particle);
+    } else if (currentValue.x == -600) {
+      toDay.easing(TWEEN.Easing.Quadratic.InOut)
+      toDay.start();
+      toDayColor.start();
+      toDayLight.start();
+    }
+  })
 }
 
 // DRAW/ANIMATE-------------------------------------------------
@@ -287,10 +267,7 @@ function draw(time) {
   //requestAnimationFrame(draw);
   TWEEN.update(time);
 
-   cone.rotation.y += 0.01;
-   //cone.rotation.z += 0.01;
-  // spotLight.target.rotation.y += 0.01;
-
+  cone.rotation.y += 0.01;
 
   // Background colour animation
   renderer.setClearColor(new THREE.Color(currentColour.r / 255,currentColour.g / 255,currentColour.b / 255,))

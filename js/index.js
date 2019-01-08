@@ -1,7 +1,7 @@
 // DAT505 - Jasmine Price - Three.js
 
 // GLOBAL-------------------------------------------------
-var camera, scene, renderer, controls, clock, composer, sunMain, light1, moonMain, lightFollow;
+var camera, scene, renderer, controls, clock, composer, sunMain, cone, light1, moonMain, lightFollow;
 var backgroundColour = 0xC5DFEB;
 var INV_MAX_FPS = 1 / 100, frameDelta = 0;
 
@@ -82,7 +82,8 @@ function setup() {
 function initialSetup() {
   scene = new THREE.Scene(); // Create new scene
   scene.fog = new THREE.FogExp2(0x9db3b5, 0.002); // Create subtle fog effect in scene
-
+  var axesHelper = new THREE.AxesHelper( 50 );
+scene.add( axesHelper );
   // Configure camera settings---------------------------------------------------
   camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 10000 );
   camera.position.y = 15;
@@ -243,22 +244,41 @@ function geoSetup() {
   // spotLight.intensity = 10;
   // var spotLightHelper = new THREE.SpotLightHelper( spotLight );
   // scene.add( spotLightHelper );
-  // spotLight.target = lightFollow;
-  // spotLight.target.updateMatrixWorld();
+  // //spotLight.target = lightFollow;
+  // //spotLight.target.updateMatrixWorld();
   // spotLight.matrixWorldNeedsUpdate;
   //
   // spotLight.castShadow = true;
-
+  //
   // spotLight.shadow.mapSize.width = 1024;
   // spotLight.shadow.mapSize.height = 1024;
   //
   // spotLight.shadow.camera.near = 500;
   // spotLight.shadow.camera.far = 4000;
   // spotLight.shadow.camera.fov = 30;
-
+  //
   // scene.add( spotLight );
   // scene.add( spotLight.target );
 
+  var geometry = new THREE.ConeGeometry( 30, 290, 32 );
+
+var material = new THREE.ShaderMaterial({
+  uniforms: { },
+  vertexShader: document.getElementById( 'vertexShader' ).textContent,
+  fragmentShader: document.getElementById( 'fragmentShader' ).textContent,
+  side: THREE.BackSide,
+  blending: THREE.AdditiveBlending,
+  transparent: true, // opacity: 0.2
+});
+cone = new THREE.Mesh( geometry, material );
+ cone.position.x = -165;
+ cone.position.y = 130;
+ cone.position.z = -70;
+ cone.rotation.x += 200;
+ cone.rotation.z += 50;
+
+geometry.applyMatrix( new THREE.Matrix4().makeTranslation(0, -150, 0) );
+scene.add( cone );
 
 }
 
@@ -267,7 +287,8 @@ function draw(time) {
   //requestAnimationFrame(draw);
   TWEEN.update(time);
 
-  // spotLight.rotation.y += 0.01;
+   cone.rotation.y += 0.01;
+   //cone.rotation.z += 0.01;
   // spotLight.target.rotation.y += 0.01;
 
 

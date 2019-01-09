@@ -6,3 +6,5 @@ The aim of the project was to create an engaging experience for an audience usin
 To use the project, start the atom-live-server within Atom. Once loaded the user can simply move their mouse around screen and the camera will follow, allowing a 360 vision of the scene. When the user left clicks the time of day will change (there are 4 possible states - day, dusk, night and dawn). 
 
 GitHub Link: https://github.com/jazzannprice/DAT505_AdvancedCreativeCoding
+
+Codepen Link: https://codepen.io/jazzannprice/

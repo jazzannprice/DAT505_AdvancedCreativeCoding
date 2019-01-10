@@ -88,13 +88,13 @@ function initialSetup() {
   //----------------------------------------------------------------------------
 
   // Configure renderer settings------------------------------------------------
-  renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-  renderer.setPixelRatio((window.devicePixelRatio) ? window.devicePixelRatio : 1);
-  renderer.setSize( window.innerWidth, window.innerHeight );
-  renderer.autoClear = false;
-  renderer.setClearColor(0xC5DFEB, 1.0);
-  renderer.shadowMap.enabled = true;
-  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true }); // WebGLRenderer with antialias
+  renderer.setPixelRatio((window.devicePixelRatio) ? window.devicePixelRatio : 1); // Pixel ratio
+  renderer.setSize( window.innerWidth, window.innerHeight ); // Window size
+  renderer.autoClear = false; // autoclear is false (does not clear depth buffer)
+  renderer.setClearColor(0xC5DFEB, 1.0); // Background colour
+  renderer.shadowMap.enabled = true; // Allowing shadow map to be used so shadows appear
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap; // Shadow type
   document.getElementById('canvas').appendChild(renderer.domElement);
   //----------------------------------------------------------------------------
 

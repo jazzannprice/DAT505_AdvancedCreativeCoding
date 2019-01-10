@@ -204,7 +204,7 @@ function geoSetup() {
     color: 0xffffff,
     shading: THREE.FlatShading,
   });
-  // For loop that will create 50 different stars in random positions and rotations, and adding it to the mesh
+  // For loop that will create 50 different stars in random positions and rotations in the X,Y and Z axis, and adding it to the mesh
   for (var i = 0; i < 50; i++) {
     var meshParticle = new THREE.Mesh(geometryParticle, materialParticle);
     meshParticle.position.set(Math.random() - 0.5, Math.random() + 0.1, Math.random() - 0.5).normalize();
@@ -218,30 +218,30 @@ function geoSetup() {
 function clickSetup(){
   // Depending on the position of the sun, certain elements will change in the scene when the user clicks on the screen
   window.addEventListener('resize', onWindowResize, false);
-  window.addEventListener('click', function () {
-    if (currentValue.x == 0) {
-      toDusk.easing(TWEEN.Easing.Quadratic.InOut)
+  window.addEventListener('click', function () { // Event listener that uses a click
+    if (currentValue.x == 0) { // If the current value of x == 0 (daytime), when the user clicks the dusk values will begin
+      toDusk.easing(TWEEN.Easing.Quadratic.InOut) // Tween movement animation eases in and out
       toDusk.start();
       toDuskColor.start();
       toDuskLight.start();
-    } else if (currentValue.x == 600) {
-      toNight.easing(TWEEN.Easing.Quadratic.InOut)
+    } else if (currentValue.x == 600) { // If the current value of x == 600 (dusk), when the user clicks the night values will begin, including adding the stars (particles) and the lighthouse spotlight
+      toNight.easing(TWEEN.Easing.Quadratic.InOut) // Tween movement animation eases in and out
       toNight.start();
       toNightColor.start();
       toMoonNight.start();
       toNightLight.start();
       spotLight.position.y = 117;
       scene.add(particle);
-    } else if (currentValue.x == -10) {
-      toDawn.easing(TWEEN.Easing.Quadratic.InOut)
+    } else if (currentValue.x == -10) { // If the current value of x == -10 (night), when the user clicks the dawn values will begin and the stars (particle) and lightouse spotlight will be removed
+      toDawn.easing(TWEEN.Easing.Quadratic.InOut) // Tween movement animation eases in and out
       toDawn.start();
       toDawnColor.start();
       toMoonDay.start();
       toDawnLight.start();
       spotLight.position.y = -500;
       scene.remove(particle);
-    } else if (currentValue.x == -600) {
-      toDay.easing(TWEEN.Easing.Quadratic.InOut)
+    } else if (currentValue.x == -600) { // If the current value of x == -600 (dawn), when the user clicks the day values will begin
+      toDay.easing(TWEEN.Easing.Quadratic.InOut) // Tween movement animation eases in and out
       toDay.start();
       toDayColor.start();
       toDayLight.start();
